@@ -1,0 +1,36 @@
+#DataPreperation
+
+library(dplyr)
+
+bball <- read.csv("college_bball_3s.csv")
+
+bball <- bball %>%
+  filter(!is.na(x_loc), !is.na(y_loc), !is.na(outcome)) %>%  # remove missing values
+  distinct() %>%  # remove duplicates
+  mutate(location = factor(paste0(x_loc, ",", y_loc)), outcome = factor(outcome))  # convert to factors
+
+#DataExploration
+library(ggplot2)
+
+ggplot(bball, aes(x = x_loc, y = y_loc)) +
+  geom_bin2d(binwidth = 5, aes(fill = ..count..)) +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  labs(title = "Heatmap of 3-Point Attempt Locations", x = "X Location", y = "Y Location")
+  
+  
+  #BarChart
+  ggplot(bball, aes(x = outcome)) +
+  geom_bar() +
+  labs(title = "Bar Chart of 3-Point Attempt Outcomes", x = "Outcome", y = "Count")
+
+#Summarize
+library(tidyr)
+
+bball_summary <- bball %>%
+  group_by(team, location) %>%
+  summarize(num_attempts = n(), success_rate = mean(outcome == "made"), avg_distance = mean(sqrt(x_loc^2 + y_loc^2))) %>%
+  arrange(desc(num_attempts))
+
+bball_summary
+
+
